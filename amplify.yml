@@ -10,7 +10,6 @@ frontend:
         - pnpm run build
         - cp -r public .next/standalone/public
         - cp -r .next/static .next/standalone/.next/static
-        - cp rds-ca-bundle.pem .next/standalone/rds-ca-bundle.pem
   artifacts:
     baseDirectory: .next/standalone
     files:
