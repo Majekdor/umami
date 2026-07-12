@@ -236,6 +236,7 @@ export default withNextIntl({
   },
   basePath,
   output: 'standalone',
+  productionBrowserSourceMaps: false,
   typescript: {
     ignoreBuildErrors: true,
   },

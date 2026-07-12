@@ -8,9 +8,7 @@ frontend:
     build:
       commands:
         - pnpm run build
-        - cp -r public .next/standalone/public
-        - cp -r .next/static .next/standalone/.next/static
-        - find .next -maxdepth 1 -mindepth 1 ! -name standalone ! -name required-server-files.json -exec rm -rf {} +
+        - find .next -iname "*.map" -delete
   artifacts:
     baseDirectory: .next
     files:
