@@ -8,12 +8,14 @@ frontend:
     build:
       commands:
         - pnpm run build
+        - cp -r public .next/public
   artifacts:
     baseDirectory: .next
     files:
-      - '**/*'
-    excludeFiles:
-      - cache/**/*
+      - required-server-files.json
+      - standalone/**/*
+      - static/**/*
+      - public/**/*
   cache:
     paths:
       - node_modules/**/*
