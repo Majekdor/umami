@@ -26,9 +26,33 @@ const target = process.argv[2] || '.next/standalone/node_modules';
 
 const canonical = {};
 
-// Multiple versions of a package (e.g. postgres-array) can exist in the pnpm
-// store for different consumers; only some copies were fully traced by Next.
-// Prefer whichever candidate actually has real content, not just a package.json stub.
+// Multiple candidates can share a bare directory name (e.g. runtime "pg" vs.
+// the unrelated "@types/pg" types-only package, or multiple pnpm-store
+// versions of "postgres-array"). Only accept a candidate whose package.json
+// actually resolves to a real JS entry point, and prefer the most complete one.
+function resolveMainFile(dirPath) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(dirPath, 'package.json'), 'utf8'));
+    const mainRel = pkg.main || 'index.js';
+
+    if (!mainRel) {
+      return null;
+    }
+
+    let mainPath = path.join(dirPath, mainRel);
+
+    if (fs.existsSync(mainPath) && fs.statSync(mainPath).isDirectory()) {
+      mainPath = path.join(mainPath, 'index.js');
+    } else if (!path.extname(mainPath)) {
+      mainPath += '.js';
+    }
+
+    return fs.existsSync(mainPath) ? mainPath : null;
+  } catch {
+    return null;
+  }
+}
+
 function completeness(dirPath) {
   try {
     return fs.readdirSync(dirPath).length;
@@ -45,12 +69,16 @@ function collectCanonical(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
 
-    if (PG_FAMILY.includes(entry.name)) {
+    if (PG_FAMILY.includes(entry.name) && path.basename(dir) !== '@types') {
       try {
         const real = fs.realpathSync(fullPath);
 
-        if (!canonical[entry.name] || completeness(real) > completeness(canonical[entry.name])) {
-          canonical[entry.name] = real;
+        if (resolveMainFile(real)) {
+          const current = canonical[entry.name];
+
+          if (!current || completeness(real) > completeness(current)) {
+            canonical[entry.name] = real;
+          }
         }
       } catch {
         // broken symlink, skip
@@ -71,7 +99,7 @@ function fixSymlinks(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const fullPath = path.join(dir, entry.name);
 
-    if (entry.isSymbolicLink() && PG_FAMILY.includes(entry.name)) {
+    if (entry.isSymbolicLink() && PG_FAMILY.includes(entry.name) && path.basename(dir) !== '@types') {
       const src = canonical[entry.name];
       fs.unlinkSync(fullPath);
 

@@ -10,7 +10,8 @@ frontend:
       commands:
         - pnpm run build
         - find .next -iname "*.map" -delete
-        - node scripts/desymlink-standalone.js
+        - node scripts/desymlink-standalone.js .next/standalone/node_modules
+        - node scripts/desymlink-standalone.js node_modules
   artifacts:
     baseDirectory: .next
     files:
