@@ -4,22 +4,15 @@ frontend:
     preBuild:
       commands:
         - npm install -g pnpm
+        - rm -rf .next
         - pnpm install --config.node-linker=hoisted
     build:
       commands:
         - pnpm run build
         - find .next -iname "*.map" -delete
-        - cp -rL .next/standalone/node_modules /tmp/resolved-modules
-        - rm -rf .next/standalone/node_modules
-        - mv /tmp/resolved-modules .next/standalone/node_modules
-        - echo "=== .next breakdown ===" && du -sh .next/* | sort -rh
-        - echo "=== standalone breakdown ===" && du -sh .next/standalone/* | sort -rh
-        - echo "=== swc/native binaries ===" && find .next/standalone -iname "*swc*" -o -iname "*.node" | xargs du -ch 2>/dev/null | tail -5
-        - echo "=== total ===" && du -sh .next
   artifacts:
     baseDirectory: .next
     files:
       - '**/*'
   cache:
-    paths:
-      - .next/cache/**/*
+    paths: []
