@@ -9,10 +9,6 @@ frontend:
       commands:
         - pnpm run build
         - find .next -iname "*.map" -delete
-        - echo "=== .next breakdown ===" && du -sh .next/* | sort -rh
-        - echo "=== standalone breakdown ===" && du -sh .next/standalone/* | sort -rh
-        - echo "=== swc/native binaries ===" && find .next/standalone -iname "*swc*" -o -iname "*.node" | xargs du -ch 2>/dev/null | tail -5
-        - echo "=== total ===" && du -sh .next
   artifacts:
     baseDirectory: .next
     files:
