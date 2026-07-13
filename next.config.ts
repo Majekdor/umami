@@ -233,6 +233,12 @@ export default withNextIntl({
     defaultLocale,
     selfTrack,
     selfRecord,
+    // AWS Amplify's SSR compute runtime doesn't inject console-configured
+    // environment variables into the Lambda's process.env, only the build
+    // environment gets them. Baking these in at build time (server-only,
+    // never referenced from client code) sidesteps that gap.
+    DATABASE_URL: process.env.DATABASE_URL,
+    GEOLITE_DB_PATH: process.env.GEOLITE_DB_PATH,
   },
   basePath,
   output: 'standalone',
