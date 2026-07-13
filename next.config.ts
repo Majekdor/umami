@@ -237,9 +237,6 @@ export default withNextIntl({
   basePath,
   output: 'standalone',
   productionBrowserSourceMaps: false,
-  outputFileTracingIncludes: {
-    '/**': ['./node_modules/pg-types/**/*'],
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
